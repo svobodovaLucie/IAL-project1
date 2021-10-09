@@ -86,9 +86,13 @@ void untilLeftPar( Stack *stack, char *postfixExpression, unsigned *postfixExpre
  * @param postfixExpressionLength Ukazatel na aktuální délku výsledného postfixového výrazu
  */
 void doOperation( Stack *stack, char c, char *postfixExpression, unsigned *postfixExpressionLength ) {
+    if (Stack_IsEmpty(stack)) {
+        Stack_Push(stack, c);
+        return;
+    }
     char top;
     Stack_Top(stack, &top);
-    if (Stack_IsEmpty(stack) || (top == '(')) {
+    if (top == '(') {
         Stack_Push(stack, c);
         return;
     }
@@ -100,7 +104,7 @@ void doOperation( Stack *stack, char c, char *postfixExpression, unsigned *postf
     (*postfixExpressionLength)++;
     Stack_Pop(stack);
 
-    /* rekurzivni volani */
+    /* rekurzivní voláni */
     doOperation(stack, c, postfixExpression, postfixExpressionLength);
 }
 
@@ -185,7 +189,7 @@ char *infix2postfix( const char *infixExpression ) {
         }
         infixExprIndex++;
     }
-    /* dokonceni vyrazu */
+    /* dokončení výrazu */
     while(!Stack_IsEmpty(&stack)) {
         Stack_Top(&stack, &(postfixExpression[postfixExprIndex]));
         postfixExprIndex++;
