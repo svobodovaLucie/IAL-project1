@@ -73,8 +73,11 @@ void Stack_Error( int error_code ) {
  * @param stack Ukazatel na strukturu zásobníku
  */
 void Stack_Init( Stack *stack ) {
-
-    solved = FALSE; /* V případě řešení, smažte tento řádek! */
+    if (stack == NULL) {
+        Stack_Error(SERR_INIT);
+        return;
+    }
+    stack->topIndex = -1;   /* prázdný zásobník: stack->topIndex == -1 */
 }
 
 /**
@@ -87,8 +90,7 @@ void Stack_Init( Stack *stack ) {
  * @returns Nenulovou hodnotu v případě, že je zásobník prázdný, jinak nulu
  */
 int Stack_IsEmpty( const Stack *stack ) {
-
-    solved = FALSE; /* V případě řešení, smažte tento řádek! */
+    return (stack->topIndex == -1);
 }
 
 /**
@@ -104,8 +106,7 @@ int Stack_IsEmpty( const Stack *stack ) {
  * @returns Nenulovou hodnotu v případě, že je zásobník plný, jinak nulu
  */
 int Stack_IsFull( const Stack *stack ) {
-
-    solved = FALSE; /* V případě řešení, smažte tento řádek! */
+    return (STACK_SIZE == stack->topIndex + 1);
 }
 
 /**
@@ -121,8 +122,11 @@ int Stack_IsFull( const Stack *stack ) {
  * @param dataPtr Ukazatel na cílovou proměnnou
  */
 void Stack_Top( const Stack *stack, char *dataPtr ) {
-
-    solved = FALSE; /* V případě řešení, smažte tento řádek! */
+    if (Stack_IsEmpty(stack)) {
+        Stack_Error(SERR_TOP);
+        return;
+    }
+    *dataPtr = stack->array[stack->topIndex];
 }
 
 
@@ -139,8 +143,10 @@ void Stack_Top( const Stack *stack, char *dataPtr ) {
  * @param stack Ukazatel na inicializovanou strukturu zásobníku
  */
 void Stack_Pop( Stack *stack ) {
-
-    solved = FALSE; /* V případě řešení, smažte tento řádek! */
+    if(Stack_IsEmpty(stack)) {
+        return;
+    }
+    stack->topIndex--;
 }
 
 
@@ -155,8 +161,12 @@ void Stack_Pop( Stack *stack ) {
  * @param data Znak k vložení
  */
 void Stack_Push( Stack *stack, char data ) {
-
-    solved = FALSE; /* V případě řešení, smažte tento řádek! */
+    if(Stack_IsFull(stack)) {
+        Stack_Error(SERR_PUSH);
+        return;
+    }
+    stack->topIndex++;
+    stack->array[stack->topIndex] = data;
 }
 
 /* Konec c202.c */
