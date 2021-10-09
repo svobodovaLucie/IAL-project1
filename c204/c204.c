@@ -55,7 +55,18 @@ int solved;
  * @param postfixExpressionLength Ukazatel na aktuální délku výsledného postfixového výrazu
  */
 void untilLeftPar( Stack *stack, char *postfixExpression, unsigned *postfixExpressionLength ) {
+    char top;
+    while (!Stack_IsEmpty(stack)) {
 
+        Stack_Top(stack, &top);
+        Stack_Pop(stack);
+
+        if (top == '(')
+            break;
+
+        postfixExpression[*postfixExpressionLength] = top;
+        (*postfixExpressionLength)++;
+    }
 }
 
 /**
@@ -75,7 +86,22 @@ void untilLeftPar( Stack *stack, char *postfixExpression, unsigned *postfixExpre
  * @param postfixExpressionLength Ukazatel na aktuální délku výsledného postfixového výrazu
  */
 void doOperation( Stack *stack, char c, char *postfixExpression, unsigned *postfixExpressionLength ) {
+    char top;
+    Stack_Top(stack, &top);
+    if (Stack_IsEmpty(stack) || (top == '(')) {
+        Stack_Push(stack, c);
+        return;
+    }
+    if ((c == '*' || c == '/') && (top == '+' || top == '-')) {
+        Stack_Push(stack, c);
+        return;
+    }
+    postfixExpression[*postfixExpressionLength] = top;
+    (*postfixExpressionLength)++;
+    Stack_Pop(stack);
 
+    /* rekurzivni volani */
+    doOperation(stack, c, postfixExpression, postfixExpressionLength);
 }
 
 /**
@@ -127,9 +153,49 @@ void doOperation( Stack *stack, char c, char *postfixExpression, unsigned *postf
  * @returns Znakový řetězec obsahující výsledný postfixový výraz
  */
 char *infix2postfix( const char *infixExpression ) {
+    if (infixExpression == NULL)
+        return NULL;
 
-    solved = FALSE; /* V případě řešení smažte tento řádek! */
-    return NULL; /* V případě řešení můžete smazat tento řádek. */
+    /* vytvoření pole pro uložení výsledného řetězce v postfixovém tvaru */
+    char *postfixExpression = (char*)malloc(MAX_LEN * sizeof(char));
+    if (postfixExpression == NULL)
+        return NULL;
+
+    /* vytvoření a inicializace zásobníku pro ukládání výrazů */
+    Stack stack;
+    Stack_Init(&stack);
+
+    /* procházení infixového výrazu a postupné zpracování na postfix */
+    unsigned postfixExprIndex = 0;
+    unsigned infixExprIndex = 0;
+    while (infixExpression[infixExprIndex] != '=') {
+        switch (infixExpression[infixExprIndex]) {
+            case '+': case '-': case '*': case '/':
+                doOperation(&stack, infixExpression[infixExprIndex], postfixExpression, &postfixExprIndex);
+                break;
+            case '(':
+                Stack_Push(&stack, infixExpression[infixExprIndex]);
+                break;
+            case ')':
+                untilLeftPar(&stack, postfixExpression, &postfixExprIndex);
+                break;
+            default:
+                postfixExpression[postfixExprIndex] = infixExpression[infixExprIndex];
+                postfixExprIndex++;
+        }
+        infixExprIndex++;
+    }
+    /* dokonceni vyrazu */
+    while(!Stack_IsEmpty(&stack)) {
+        Stack_Top(&stack, &(postfixExpression[postfixExprIndex]));
+        postfixExprIndex++;
+        Stack_Pop(&stack);
+    }
+
+    /* ukončení postfixového výrazu */
+    postfixExpression[postfixExprIndex] = '=';
+    postfixExpression[postfixExprIndex + 1] = '\0';
+    return postfixExpression;
 }
 
 /* Konec c204.c */
